@@ -135,6 +135,20 @@
   }
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.error { background: #c44; }
+
+  /* Preview section */
+  .preview-section { margin-top: 2rem; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 1.5rem; }
+  .preview-section h3 { font-size: 0.9rem; font-weight: 400; color: var(--text-light); margin-bottom: 1rem; }
+  .preview-content { background: var(--cream); border-radius: 6px; padding: 1.25rem; }
+  .preview-empty { color: var(--text-light); font-style: italic; text-align: center; padding: 1rem; }
+  .pv-gig { display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.9rem; align-items: baseline; }
+  .pv-gig:last-child { border-bottom: none; }
+  .pv-date { color: var(--gold); font-weight: 500; min-width: 100px; font-size: 0.85rem; }
+  .pv-photo { display: inline-block; margin: 0.25rem; }
+  .pv-photo img { width: 180px; height: 135px; object-fit: cover; border-radius: 4px; }
+  .pv-photo span { display: block; font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem; }
+  .pv-link { padding: 0.3rem 0; font-size: 0.9rem; }
+  .pv-link a { color: var(--green-deep); }
 </style>
 </head>
 <body>
@@ -179,6 +193,10 @@
       <button onclick="addGig()">Add Gig</button>
     </div>
     <ul class="item-list" id="gig-list"></ul>
+    <div class="preview-section">
+      <h3>Live Preview <span style="font-weight:400;font-size:0.85rem;color:var(--text-light)">(what visitors see)</span></h3>
+      <div class="preview-content" id="preview-gigs"></div>
+    </div>
   </div>
 
   <!-- Gallery -->
@@ -197,6 +215,10 @@
       <p style="font-size:0.8rem;color:var(--text-light);margin-top:0.5rem">Upload photos to the site repo first, then add the path here.</p>
     </div>
     <ul class="item-list" id="gallery-list"></ul>
+    <div class="preview-section">
+      <h3>Live Preview <span style="font-weight:400;font-size:0.85rem;color:var(--text-light)">(what visitors see)</span></h3>
+      <div class="preview-content" id="preview-gallery"></div>
+    </div>
   </div>
 
   <!-- Music -->
@@ -214,6 +236,10 @@
       <button onclick="addMusic()">Add Link</button>
     </div>
     <ul class="item-list" id="music-list"></ul>
+    <div class="preview-section">
+      <h3>Live Preview <span style="font-weight:400;font-size:0.85rem;color:var(--text-light)">(what visitors see)</span></h3>
+      <div class="preview-content" id="preview-music"></div>
+    </div>
   </div>
 </div>
 
@@ -237,9 +263,24 @@ const API = '/api';
 let password = sessionStorage.getItem('admin-pw');
 let currentTab = 'gigs';
 let editing = null;
+// Store items in memory for event-delegation lookup
+const itemsByTab = { gigs: [], gallery: [], music: [] };
 
 // Init
 if (password) showAdmin();
+
+// ── Delegated click handler for edit/delete buttons ──
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const { action, tab, id } = btn.dataset;
+  if (!tab || !id) return;
+  if (action === 'edit') {
+    const item = (itemsByTab[tab] || []).find(i => i.id === parseInt(id));
+    if (item) openEditModal(tab, item);
+  }
+  if (action === 'delete') deleteItem(tab, parseInt(id));
+});
 
 async function login() {
   const pw = document.getElementById('login-password').value;
@@ -297,7 +338,9 @@ async function loadTab(tab) {
     });
     if (res.status === 401) { logout(); return; }
     const items = await res.json();
+    itemsByTab[tab] = items;
     renderList(tab, items);
+    renderPreview(tab, items);
   } catch {
     document.getElementById(tab + '-list').innerHTML = '<li class="empty-state">Failed to load.</li>';
   }
@@ -305,31 +348,62 @@ async function loadTab(tab) {
 
 function renderList(tab, items) {
   const list = document.getElementById(tab + '-list');
-  const getInfo = item => {
-    if (tab === 'gigs') return { title: item.title, sub: `${item.date}${item.venue ? ' — ' + item.venue : ''}`, fields: ['date','title','venue','description','sort_date'] };
-    if (tab === 'gallery') return { title: item.image_url, sub: item.caption || item.alt_text || '', fields: ['image_url','alt_text','caption','sort_order'] };
-    return { title: item.title, sub: item.platform || item.url || '', fields: ['title','url','platform','sort_order'] };
-  };
   if (!items.length) {
     list.innerHTML = '<li class="empty-state">Nothing here yet. Add something above!</li>';
     return;
   }
   list.innerHTML = items.map(item => {
-    const info = getInfo(item);
+    let title = '', sub = '';
+    if (tab === 'gigs') {
+      title = item.title;
+      sub = `${item.date}${item.venue ? ' — ' + item.venue : ''}${item.description ? ' — ' + item.description : ''}`;
+    } else if (tab === 'gallery') {
+      title = item.image_url;
+      sub = [item.caption, item.alt_text].filter(Boolean).join(' | ') || 'No caption';
+    } else {
+      title = item.title;
+      sub = [item.platform, item.url].filter(Boolean).join(' — ') || 'No link';
+    }
     return `<li class="item">
       <div class="item-info">
-        <div class="title">${esc(info.title)}</div>
-        <div class="sub">${esc(info.sub)}</div>
+        <div class="title">${esc(title)}</div>
+        <div class="sub">${esc(sub)}</div>
       </div>
       <div class="item-actions">
-        <button onclick='editItem("${tab}",${JSON.stringify(item).replace(/'/g,"&#39;")})'>Edit</button>
-        <button class="danger" onclick='deleteItem("${tab}",${item.id})'>Delete</button>
+        <button data-action="edit" data-tab="${tab}" data-id="${item.id}">Edit</button>
+        <button class="danger" data-action="delete" data-tab="${tab}" data-id="${item.id}">Delete</button>
       </div>
     </li>`;
   }).join('');
 }
 
-function editItem(tab, item) {
+// ── Live preview — renders items as the public site does ──
+function renderPreview(tab, items) {
+  const container = document.getElementById('preview-' + tab);
+  if (!container) return;
+  if (!items.length) {
+    container.innerHTML = '<p class="preview-empty">Nothing live yet.</p>';
+    return;
+  }
+  if (tab === 'gigs') {
+    container.innerHTML = items.map(g =>
+      `<div class="pv-gig">
+        <span class="pv-date">${esc(g.date)}</span>
+        <div><strong>${esc(g.title)}</strong>${g.venue ? '<br><em>' + esc(g.venue) + '</em>' : ''}${g.description ? '<br>' + esc(g.description) : ''}</div>
+      </div>`
+    ).join('');
+  } else if (tab === 'gallery') {
+    container.innerHTML = items.map(p =>
+      `<div class="pv-photo"><img src="${esc(p.image_url)}" alt="${esc(p.alt_text || '')}"><span>${esc(p.caption || '')}</span></div>`
+    ).join('');
+  } else {
+    container.innerHTML = items.map(l =>
+      `<div class="pv-link">🎵 ${l.platform ? esc(l.platform) + ': ' : ''}<a href="${esc(l.url || '#')}" target="_blank">${esc(l.title)}</a></div>`
+    ).join('');
+  }
+}
+
+function openEditModal(tab, item) {
   editing = { tab, id: item.id };
   const fields = tab === 'gigs' ? ['date','title','venue','description','sort_date']
     : tab === 'gallery' ? ['image_url','alt_text','caption','sort_order']
