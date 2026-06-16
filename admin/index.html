@@ -341,14 +341,17 @@ async function loadTab(tab) {
     itemsByTab[tab] = items;
     renderList(tab, items);
     renderPreview(tab, items);
-  } catch {
-    document.getElementById(tab + '-list').innerHTML = '<li class="empty-state">Failed to load.</li>';
+  } catch(e) {
+    console.error('loadTab failed for', tab, e);
+    const listEl = document.getElementById(tab + '-list');
+    if (listEl) listEl.innerHTML = '<li class="empty-state">Failed to load.</li>';
   }
 }
 
 function renderList(tab, items) {
   const list = document.getElementById(tab + '-list');
-  if (!items.length) {
+  if (!list) { console.error('renderList: element not found:', tab + '-list'); return; }
+  if (!items || !items.length) {
     list.innerHTML = '<li class="empty-state">Nothing here yet. Add something above!</li>';
     return;
   }
@@ -380,8 +383,8 @@ function renderList(tab, items) {
 // ── Live preview — renders items as the public site does ──
 function renderPreview(tab, items) {
   const container = document.getElementById('preview-' + tab);
-  if (!container) return;
-  if (!items.length) {
+  if (!container) { console.error('renderPreview: container not found:', 'preview-' + tab); return; }
+  if (!items || !items.length) {
     container.innerHTML = '<p class="preview-empty">Nothing live yet.</p>';
     return;
   }
