@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Gluin Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #2b2b2b;
+    background: #faf7f2;
+    line-height: 1.7;
+  }
+  :root {
+    --green-deep: #2d5016; --green-mid: #4a7c2e; --green-light: #e8f0e2;
+    --cream: #faf7f2; --cream-dark: #f0eadb; --gold: #c4963a;
+    --text: #2b2b2b; --text-light: #6b6b6b;
+  }
+  .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  /* Login screen */
+  #login-screen {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 2rem;
+  }
+  #login-screen h1 { font-size: 2.5rem; font-weight: 400; color: var(--green-deep); margin-bottom: 0.5rem; }
+  #login-screen .subtitle { color: var(--text-light); margin-bottom: 2rem; font-style: italic; }
+  #login-screen input {
+    padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px;
+    font-size: 1rem; width: 280px; margin-bottom: 1rem; font-family: inherit;
+  }
+  #login-screen button {
+    background: var(--green-deep); color: #fff; border: none;
+    padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 1rem;
+    cursor: pointer; font-family: inherit;
+  }
+  #login-screen button:hover { background: #3a6b1e; }
+  #login-screen .error { color: #c44; margin-top: 1rem; font-size: 0.9rem; }
+
+  /* Admin panel */
+  #admin-screen { display: none; max-width: 900px; margin: 0 auto; padding: 2rem; }
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); margin-bottom: 2rem;
+  }
+  .admin-header h1 { font-size: 1.5rem; font-weight: 400; color: var(--green-deep); }
+  .admin-header button {
+    background: none; border: 1px solid rgba(0,0,0,0.2); color: var(--text-light);
+    padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 0.85rem;
+  }
+  .admin-header button:hover { border-color: var(--green-deep); color: var(--green-deep); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 2px solid var(--cream-dark); }
+  .tab {
+    padding: 0.6rem 1.5rem; cursor: pointer; border: none; background: none;
+    font-family: inherit; font-size: 1rem; color: var(--text-light);
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+  }
+  .tab.active { color: var(--green-deep); border-bottom-color: var(--green-deep); }
+  .tab:hover { color: var(--green-deep); }
+
+  /* Forms */
+  .add-form {
+    background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 6px;
+    padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .add-form h3 { font-size: 1rem; font-weight: 400; color: var(--green-mid); margin-bottom: 1rem; }
+  .form-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .form-row input, .form-row textarea {
+    padding: 0.6rem 0.75rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px;
+    font-family: inherit; font-size: 0.9rem; flex: 1; min-width: 150px;
+  }
+  .form-row textarea { min-height: 60px; resize: vertical; }
+  .add-form button {
+    background: var(--green-deep); color: #fff; border: none;
+    padding: 0.5rem 1.25rem; border-radius: 4px; font-size: 0.9rem;
+    cursor: pointer; font-family: inherit;
+  }
+  .add-form button:hover { background: #3a6b1e; }
+
+  /* Item list */
+  .item-list { list-style: none; }
+  .item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.75rem 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+    gap: 1rem;
+  }
+  .item-info { flex: 1; }
+  .item-info .title { font-size: 1rem; color: var(--text); }
+  .item-info .sub { font-size: 0.85rem; color: var(--text-light); font-style: italic; }
+  .item-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+  .item-actions button {
+    background: none; border: 1px solid rgba(0,0,0,0.15); color: var(--text-light);
+    padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer;
+    font-family: inherit; font-size: 0.8rem;
+  }
+  .item-actions button.danger { border-color: #c44; color: #c44; }
+  .item-actions button:hover { border-color: var(--green-deep); color: var(--green-deep); }
+  .item-actions button.danger:hover { background: #c44; color: #fff; }
+
+  /* Edit modal */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.3); z-index: 100; justify-content: center; align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: #fff; border-radius: 8px; padding: 2rem; max-width: 500px;
+    width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  }
+  .modal h3 { font-size: 1.2rem; font-weight: 400; color: var(--green-deep); margin-bottom: 1rem; }
+  .modal label { display: block; font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.25rem; margin-top: 0.75rem; }
+  .modal input, .modal textarea {
+    width: 100%; padding: 0.6rem 0.75rem; border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 4px; font-family: inherit; font-size: 0.9rem;
+  }
+  .modal textarea { min-height: 80px; resize: vertical; }
+  .modal .btn-row { display: flex; gap: 0.75rem; margin-top: 1.25rem; justify-content: flex-end; }
+  .modal .btn-row button {
+    padding: 0.5rem 1.25rem; border-radius: 4px; font-size: 0.9rem;
+    cursor: pointer; font-family: inherit;
+  }
+  .modal .btn-save { background: var(--green-deep); color: #fff; border: none; }
+  .modal .btn-save:hover { background: #3a6b1e; }
+  .modal .btn-cancel { background: none; border: 1px solid rgba(0,0,0,0.2); color: var(--text-light); }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-light); font-style: italic; }
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--green-deep); color: #fff;
+    padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 0.9rem; z-index: 200;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: #c44; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <h1>Gluin Admin</h1>
+  <p class="subtitle">Band member access</p>
+  <input type="password" id="login-password" placeholder="Password" autofocus>
+  <button onclick="login()">Sign In</button>
+  <p class="error" id="login-error"></p>
+</div>
+
+<!-- Admin -->
+<div id="admin-screen">
+  <div class="admin-header">
+    <h1>Gluin Admin</h1>
+    <button onclick="logout()">Sign Out</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('gigs')">Gigs</button>
+    <button class="tab" onclick="switchTab('gallery')">Gallery</button>
+    <button class="tab" onclick="switchTab('music')">Music</button>
+  </div>
+
+  <!-- Gigs -->
+  <div id="tab-gigs">
+    <div class="add-form">
+      <h3>Add Gig</h3>
+      <div class="form-row">
+        <input type="text" id="gig-date" placeholder="Date (e.g. Jun 21)">
+        <input type="text" id="gig-title" placeholder="Title">
+      </div>
+      <div class="form-row">
+        <input type="text" id="gig-venue" placeholder="Venue">
+        <input type="text" id="gig-sort" placeholder="Sort date (YYYY-MM-DD)">
+      </div>
+      <div class="form-row">
+        <textarea id="gig-desc" placeholder="Description"></textarea>
+      </div>
+      <button onclick="addGig()">Add Gig</button>
+    </div>
+    <ul class="item-list" id="gig-list"></ul>
+  </div>
+
+  <!-- Gallery -->
+  <div id="tab-gallery" style="display:none">
+    <div class="add-form">
+      <h3>Add Photo</h3>
+      <div class="form-row">
+        <input type="text" id="gal-url" placeholder="Image URL (e.g. photos/new.jpg)">
+        <input type="text" id="gal-alt" placeholder="Alt text">
+      </div>
+      <div class="form-row">
+        <input type="text" id="gal-caption" placeholder="Caption">
+        <input type="number" id="gal-order" placeholder="Sort order" style="max-width:100px">
+      </div>
+      <button onclick="addGallery()">Add Photo</button>
+      <p style="font-size:0.8rem;color:var(--text-light);margin-top:0.5rem">Upload photos to the site repo first, then add the path here.</p>
+    </div>
+    <ul class="item-list" id="gallery-list"></ul>
+  </div>
+
+  <!-- Music -->
+  <div id="tab-music" style="display:none">
+    <div class="add-form">
+      <h3>Add Music Link</h3>
+      <div class="form-row">
+        <input type="text" id="mus-title" placeholder="Title">
+        <input type="text" id="mus-platform" placeholder="Platform (e.g. YouTube)">
+      </div>
+      <div class="form-row">
+        <input type="url" id="mus-url" placeholder="URL">
+        <input type="number" id="mus-order" placeholder="Sort order" style="max-width:100px">
+      </div>
+      <button onclick="addMusic()">Add Link</button>
+    </div>
+    <ul class="item-list" id="music-list"></ul>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <h3 id="modal-title">Edit</h3>
+    <div id="modal-fields"></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let password = sessionStorage.getItem('admin-pw');
+let currentTab = 'gigs';
+let editing = null;
+
+// Init
+if (password) showAdmin();
+
+async function login() {
+  const pw = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  try {
+    const res = await fetch(API + '/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 429) { err.textContent = 'Too many attempts. Try again later.'; }
+      else { err.textContent = data.error || 'Invalid password'; }
+      return;
+    }
+    password = pw;
+    sessionStorage.setItem('admin-pw', pw);
+    showAdmin();
+  } catch {
+    err.textContent = 'Connection error. Is the site deployed?';
+  }
+}
+
+function showAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-screen').style.display = 'block';
+  loadTab('gigs');
+}
+
+function logout() {
+  sessionStorage.removeItem('admin-pw');
+  password = null;
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['gigs','gallery','music'][i] === tab);
+  });
+  document.getElementById('tab-gigs').style.display = tab === 'gigs' ? '' : 'none';
+  document.getElementById('tab-gallery').style.display = tab === 'gallery' ? '' : 'none';
+  document.getElementById('tab-music').style.display = tab === 'music' ? '' : 'none';
+  loadTab(tab);
+}
+
+async function loadTab(tab) {
+  const endpoints = { gigs: '/admin/gigs', gallery: '/admin/gallery', music: '/admin/music' };
+  try {
+    const res = await fetch(API + endpoints[tab], {
+      headers: { 'X-Admin-Password': password || '' }
+    });
+    if (res.status === 401) { logout(); return; }
+    const items = await res.json();
+    renderList(tab, items);
+  } catch {
+    document.getElementById(tab + '-list').innerHTML = '<li class="empty-state">Failed to load.</li>';
+  }
+}
+
+function renderList(tab, items) {
+  const list = document.getElementById(tab + '-list');
+  const getInfo = item => {
+    if (tab === 'gigs') return { title: item.title, sub: `${item.date}${item.venue ? ' — ' + item.venue : ''}`, fields: ['date','title','venue','description','sort_date'] };
+    if (tab === 'gallery') return { title: item.image_url, sub: item.caption || item.alt_text || '', fields: ['image_url','alt_text','caption','sort_order'] };
+    return { title: item.title, sub: item.platform || item.url || '', fields: ['title','url','platform','sort_order'] };
+  };
+  if (!items.length) {
+    list.innerHTML = '<li class="empty-state">Nothing here yet. Add something above!</li>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const info = getInfo(item);
+    return `<li class="item">
+      <div class="item-info">
+        <div class="title">${esc(info.title)}</div>
+        <div class="sub">${esc(info.sub)}</div>
+      </div>
+      <div class="item-actions">
+        <button onclick='editItem("${tab}",${JSON.stringify(item).replace(/'/g,"&#39;")})'>Edit</button>
+        <button class="danger" onclick='deleteItem("${tab}",${item.id})'>Delete</button>
+      </div>
+    </li>`;
+  }).join('');
+}
+
+function editItem(tab, item) {
+  editing = { tab, id: item.id };
+  const fields = tab === 'gigs' ? ['date','title','venue','description','sort_date']
+    : tab === 'gallery' ? ['image_url','alt_text','caption','sort_order']
+    : ['title','url','platform','sort_order'];
+  const labels = tab === 'gigs' ? { date:'Date', title:'Title', venue:'Venue', description:'Description', sort_date:'Sort Date' }
+    : tab === 'gallery' ? { image_url:'Image URL', alt_text:'Alt Text', caption:'Caption', sort_order:'Sort Order' }
+    : { title:'Title', url:'URL', platform:'Platform', sort_order:'Sort Order' };
+
+  document.getElementById('modal-title').textContent = 'Edit ' + tab.slice(0,-1);
+  document.getElementById('modal-fields').innerHTML = fields.map(f =>
+    `<label>${labels[f] || f}</label>
+     ${f === 'description' ? `<textarea id="edit-${f}">${esc(item[f] || '')}</textarea>`
+       : `<input id="edit-${f}" value="${esc(item[f] || '')}">`}`
+  ).join('');
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+async function saveEdit() {
+  const tab = editing.tab;
+  const id = editing.id;
+  const fields = tab === 'gigs' ? ['date','title','venue','description','sort_date']
+    : tab === 'gallery' ? ['image_url','alt_text','caption','sort_order']
+    : ['title','url','platform','sort_order'];
+  const body = {};
+  fields.forEach(f => { body[f] = document.getElementById('edit-'+f)?.value || ''; });
+
+  const res = await fetch(`${API}/admin/${tab}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password || '' },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401) { logout(); return; }
+  if (res.ok) { closeModal(); loadTab(tab); toast('Saved!'); }
+  else { alert('Failed to save.'); }
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('active');
+  editing = null;
+}
+
+async function deleteItem(tab, id) {
+  if (!confirm('Delete this item?')) return;
+  const res = await fetch(`${API}/admin/${tab}/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Password': password || '' }
+  });
+  if (res.status === 401) { logout(); return; }
+  if (res.ok) { loadTab(tab); toast('Deleted.'); }
+  else { alert('Failed to delete.'); }
+}
+
+async function addGig() {
+  const date = document.getElementById('gig-date').value.trim();
+  const title = document.getElementById('gig-title').value.trim();
+  if (!date || !title) { toast('Date and title are required.', true); return; }
+  const body = {
+    date, title,
+    venue: document.getElementById('gig-venue').value.trim(),
+    description: document.getElementById('gig-desc').value.trim(),
+    sort_date: document.getElementById('gig-sort').value.trim() || date
+  };
+  const res = await fetch(API + '/admin/gigs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password || '' },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401) { logout(); return; }
+  if (res.ok) {
+    ['gig-date','gig-title','gig-venue','gig-desc','gig-sort'].forEach(id => document.getElementById(id).value = '');
+    loadTab('gigs'); toast('Gig added!');
+  } else { alert('Failed to add.'); }
+}
+
+async function addGallery() {
+  const image_url = document.getElementById('gal-url').value.trim();
+  if (!image_url) { toast('Image URL is required.', true); return; }
+  const body = {
+    image_url,
+    alt_text: document.getElementById('gal-alt').value.trim(),
+    caption: document.getElementById('gal-caption').value.trim(),
+    sort_order: parseInt(document.getElementById('gal-order').value || '0')
+  };
+  const res = await fetch(API + '/admin/gallery', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password || '' },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401) { logout(); return; }
+  if (res.ok) {
+    ['gal-url','gal-alt','gal-caption','gal-order'].forEach(id => document.getElementById(id).value = '');
+    loadTab('gallery'); toast('Photo added!');
+  } else { alert('Failed to add.'); }
+}
+
+async function addMusic() {
+  const title = document.getElementById('mus-title').value.trim();
+  if (!title) { toast('Title is required.', true); return; }
+  const body = {
+    title,
+    url: document.getElementById('mus-url').value.trim(),
+    platform: document.getElementById('mus-platform').value.trim(),
+    sort_order: parseInt(document.getElementById('mus-order').value || '0')
+  };
+  const res = await fetch(API + '/admin/music', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password || '' },
+    body: JSON.stringify(body)
+  });
+  if (res.status === 401) { logout(); return; }
+  if (res.ok) {
+    ['mus-title','mus-url','mus-platform','mus-order'].forEach(id => document.getElementById(id).value = '');
+    loadTab('music'); toast('Link added!');
+  } else { alert('Failed to add.'); }
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

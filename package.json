@@ -1,0 +1,7 @@
+{
+  "name": "gluin-site",
+  "private": true,
+  "dependencies": {
+    "hono": "^4.7.0"
+  }
+}

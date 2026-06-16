@@ -260,10 +260,9 @@
     <p class="section-label">Listen</p>
     <h2>Music &amp; Recordings</h2>
     <p class="lead">Follow us on Instagram for session clips, tune snippets, and updates. Recordings coming soon.</p>
-    <div class="listen-placeholder">
+    <div class="listen-placeholder" id="music-container">
       <p style="font-size:2rem">🎵</p>
-      <p>Instagram Reels &amp; Session Clips</p>
-      <p class="note">→ <a href="#" style="color:var(--green-deep)">@gluinmusic on Instagram</a></p>
+      <p>Loading music links…</p>
     </div>
   </div>
 </section>
@@ -277,28 +276,8 @@
       <img src="photos/gig-1.png" alt="Gig flyer" style="max-width:300px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
       <img src="photos/gig-2.png" alt="Gig flyer" style="max-width:300px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
     </div>
-    <ul class="gig-list">
-      <li>
-        <span class="gig-date">Coming Up</span>
-        <div class="gig-info">
-          <h3>Your Event Here</h3>
-          <p class="venue">Available for booking — weddings, parties, festivals, pubs</p>
-        </div>
-      </li>
-      <li>
-        <span class="gig-date">Local Session</span>
-        <div class="gig-info">
-          <h3>Plough &amp; the Stars</h3>
-          <p class="venue">San Francisco, CA — Regular session</p>
-        </div>
-      </li>
-      <li>
-        <span class="gig-date">Local Session</span>
-        <div class="gig-info">
-          <h3>Starry Plough</h3>
-          <p class="venue">Berkeley, CA — Irish trad night</p>
-        </div>
-      </li>
+    <ul class="gig-list" id="gig-list">
+      <li><p style="color:var(--text-light);font-style:italic">Loading gigs…</p></li>
     </ul>
   </div>
 </section>
@@ -308,12 +287,8 @@
     <p class="section-label">Photos</p>
     <h2>Gallery</h2>
     <p class="lead">Moments from gigs, sessions, and the road.</p>
-    <div class="gallery-grid">
-      <div class="gallery-item"><img src="photos/gallery-1.jpg" alt="Gluin performance"></div>
-      <div class="gallery-item"><img src="photos/gallery-2.jpg" alt="Gluin performance"></div>
-      <div class="gallery-item"><img src="photos/gallery-3.jpg" alt="Gluin performance"></div>
-      <div class="gallery-item"><img src="photos/gallery-4.jpg" alt="Gluin group shot"></div>
-      <div class="gallery-item"><img src="photos/gallery-5.jpg" alt="Gluin group shot"></div>
+    <div class="gallery-grid" id="gallery-grid">
+      <p style="color:var(--text-light);font-style:italic;grid-column:1/-1;text-align:center">Loading photos…</p>
     </div>
   </div>
 </section>
@@ -330,11 +305,12 @@
         <p style="margin-top:1rem">Email: <a href="mailto:gluinmusic@gmail.com">gluinmusic@gmail.com</a></p>
         <p>Instagram: <a href="#">@gluinmusic</a></p>
       </div>
-      <form>
-        <input type="text" placeholder="Your Name" required>
-        <input type="email" placeholder="Your Email" required>
-        <textarea placeholder="Tell us about your event — date, location, type of gig..."></textarea>
-        <button type="submit">Send Message</button>
+      <form id="contact-form">
+        <input type="text" id="contact-name" placeholder="Your Name" required>
+        <input type="email" id="contact-email" placeholder="Your Email" required>
+        <textarea id="contact-message" placeholder="Tell us about your event — date, location, type of gig..."></textarea>
+        <button type="submit" id="contact-submit">Send Message</button>
+        <p id="contact-status" style="margin-top:0.75rem;font-size:0.9rem;display:none"></p>
       </form>
     </div>
   </div>
@@ -349,5 +325,102 @@
   <p>&copy; 2026 Gluin. Irish Traditional Music, SF Bay Area.</p>
 </footer>
 
+<script>
+// ── Load dynamic content from API ──
+(async function() {
+  const API = '/api';
+
+  // Load gigs
+  try {
+    const res = await fetch(API + '/gigs');
+    const gigs = await res.json();
+    const list = document.getElementById('gig-list');
+    if (gigs.length) {
+      list.innerHTML = gigs.map(g =>
+        `<li>
+          <span class="gig-date">${esc(g.date)}</span>
+          <div class="gig-info">
+            <h3>${esc(g.title)}</h3>
+            ${g.venue ? `<p class="venue">${esc(g.venue)}</p>` : ''}
+            ${g.description && g.description !== g.venue ? `<p style="font-size:0.9rem;color:var(--text-light)">${esc(g.description)}</p>` : ''}
+          </div>
+        </li>`
+      ).join('');
+    } else {
+      list.innerHTML = '<li><p style="color:var(--text-light);font-style:italic">Gigs coming soon — check back!</p></li>';
+    }
+  } catch(e) { console.warn('Failed to load gigs', e); }
+
+  // Load gallery
+  try {
+    const res = await fetch(API + '/gallery');
+    const photos = await res.json();
+    const grid = document.getElementById('gallery-grid');
+    if (photos.length) {
+      grid.innerHTML = photos.map(p =>
+        `<div class="gallery-item"><img src="${esc(p.image_url)}" alt="${esc(p.alt_text || 'Gluin')}" loading="lazy"></div>`
+      ).join('');
+    } else {
+      grid.innerHTML = '<p style="color:var(--text-light);font-style:italic;grid-column:1/-1;text-align:center">Photos coming soon!</p>';
+    }
+  } catch(e) { console.warn('Failed to load gallery', e); }
+
+  // Load music links
+  try {
+    const res = await fetch(API + '/music');
+    const links = await res.json();
+    const container = document.getElementById('music-container');
+    if (links.length) {
+      container.innerHTML =
+        '<p style="font-size:2rem">🎵</p>' +
+        links.map(l =>
+          `<p style="margin-bottom:0.5rem">${l.platform ? esc(l.platform) + ': ' : ''}<a href="${esc(l.url || '#')}" style="color:var(--green-deep)" target="_blank" rel="noopener">${esc(l.title)}</a></p>`
+        ).join('');
+    } else {
+      container.innerHTML = '<p style="font-size:2rem">🎵</p><p>Music links coming soon.</p>';
+    }
+  } catch(e) { console.warn('Failed to load music', e); }
+})();
+
+// ── Contact form ──
+document.getElementById('contact-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('contact-submit');
+  const status = document.getElementById('contact-status');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  status.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('contact-name').value.trim(),
+        email: document.getElementById('contact-email').value.trim(),
+        message: document.getElementById('contact-message').value.trim()
+      })
+    });
+    const data = await res.json();
+    status.style.display = 'block';
+    if (res.ok) {
+      status.style.color = 'var(--green-deep)';
+      status.textContent = '✓ Message sent! We\'ll get back to you soon.';
+      document.getElementById('contact-form').reset();
+    } else {
+      status.style.color = '#c44';
+      status.textContent = data.error || 'Something went wrong. Please try emailing us directly.';
+    }
+  } catch(err) {
+    status.style.display = 'block';
+    status.style.color = '#c44';
+    status.textContent = 'Connection error. Please email us directly at gluinmusic@gmail.com.';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Message';
+});
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
 </body>
 </html>

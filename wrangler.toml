@@ -1,0 +1,11 @@
+name = "gluin-site"
+compatibility_date = "2025-06-16"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gluin-db"
+database_id = "2e369467-6810-4d14-8519-ebb788179a26"
+
+[vars]
+CONTACT_EMAIL = "stcredzero@fastmail.com"
