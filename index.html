@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Gluin — Irish Traditional Music in the San Francisco Bay Area. Available for gigs, sessions, weddings, and events.">
+<title>Gluin — Irish Traditional Music</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #2b2b2b;
+    background: #faf7f2;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Colors (Irish trad palette) ── */
+  :root {
+    --green-deep: #2d5016;
+    --green-mid: #4a7c2e;
+    --green-light: #e8f0e2;
+    --cream: #faf7f2;
+    --cream-dark: #f0eadb;
+    --gold: #c4963a;
+    --gold-light: #e8d5a3;
+    --earth: #5c4334;
+    --text: #2b2b2b;
+    --text-light: #6b6b6b;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250, 247, 242, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 0.75rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav .logo { font-size: 1.3rem; font-weight: 700; color: var(--green-deep); letter-spacing: 0.03em; }
+  nav .logo span { color: var(--gold); }
+  nav .links { display: flex; gap: 1.5rem; list-style: none; }
+  nav .links a {
+    text-decoration: none; color: var(--text-light); font-size: 0.9rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--green-deep); }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; text-align: center; padding: 6rem 2rem 4rem;
+    background: linear-gradient(160deg, rgba(45,80,22,0.35) 0%, rgba(45,80,22,0.15) 40%, rgba(0,0,0,0.3) 100%),
+                url('photos/hero.jpg') center/cover no-repeat;
+    position: relative; overflow: hidden;
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 8vw, 6rem); font-weight: 400; color: #fff;
+    letter-spacing: 0.04em; position: relative; z-index: 1;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .hero h1 .accent { color: var(--gold-light); font-style: italic; }
+  .hero .tagline {
+    font-size: 1.15rem; color: rgba(255,255,255,0.9); max-width: 480px; margin: 1rem auto 2rem;
+    font-style: italic; position: relative; z-index: 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .hero .cta {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .hero .btn-outline { border-color: rgba(255,255,255,0.7); color: #fff; }
+  .hero .btn-outline:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
+  .btn {
+    display: inline-block; padding: 0.75rem 1.75rem; border-radius: 4px; text-decoration: none;
+    font-size: 0.95rem; font-weight: 500; transition: all 0.2s; letter-spacing: 0.02em;
+  }
+  .btn-primary { background: var(--green-deep); color: #fff; }
+  .btn-primary:hover { background: #3a6b1e; }
+  .btn-outline { border: 1.5px solid var(--green-deep); color: var(--green-deep); }
+  .btn-outline:hover { background: var(--green-deep); color: #fff; }
+
+  /* ── Sections ── */
+  section { padding: 5rem 2rem; }
+  .section-inner { max-width: 860px; margin: 0 auto; }
+  .section-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--gold); margin-bottom: 0.5rem;
+  }
+  h2 {
+    font-size: 2rem; font-weight: 400; color: var(--green-deep);
+    margin-bottom: 1.5rem; letter-spacing: 0.02em;
+  }
+  p { margin-bottom: 1rem; color: var(--text); }
+  p.lead { font-size: 1.15rem; color: var(--text-light); font-style: italic; }
+
+  /* ── About ── */
+  #about { background: #fff; }
+
+  /* ── Band Members ── */
+  #members { background: var(--cream-dark); }
+  .member-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem; margin-top: 2rem;
+  }
+  .member-card { text-align: center; }
+  .member-photo {
+    width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 0.75rem;
+    object-fit: cover; display: block;
+  }
+  .member-card h3 { font-size: 1.1rem; font-weight: 400; color: var(--earth); }
+  .member-card .role { font-size: 0.85rem; color: var(--text-light); font-style: italic;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  /* ── Listen ── */
+  #listen { background: #fff; }
+  .listen-placeholder {
+    background: var(--green-light); border-radius: 8px; padding: 3rem 2rem;
+    text-align: center; color: var(--green-mid); margin-top: 1.5rem;
+  }
+  .listen-placeholder .note { font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  /* ── Gigs ── */
+  #gigs { background: var(--cream-dark); }
+  .gig-list { list-style: none; margin-top: 1.5rem; }
+  .gig-list li {
+    padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,0.08);
+    display: flex; gap: 1.5rem; align-items: baseline;
+  }
+  .gig-date {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.85rem; color: var(--gold); min-width: 120px; font-weight: 500;
+  }
+  .gig-info h3 { font-size: 1.1rem; font-weight: 400; }
+  .gig-info .venue { font-size: 0.9rem; color: var(--text-light); font-style: italic; }
+
+  /* ── Gallery ── */
+  #gallery { background: #fff; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+  .gallery-item {
+    aspect-ratio: 4/3; border-radius: 4px;
+    overflow: hidden;
+  }
+  .gallery-item img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.3s;
+  }
+  .gallery-item img:hover { transform: scale(1.05); }
+
+  /* ── Contact ── */
+  #contact { background: var(--cream-dark); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 1.5rem; }
+  .contact-info p { margin-bottom: 0.5rem; }
+  .contact-info a { color: var(--green-deep); text-decoration: underline; }
+  form { display: flex; flex-direction: column; gap: 1rem; }
+  input, textarea {
+    padding: 0.75rem 1rem; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.95rem; background: #fff;
+  }
+  textarea { min-height: 100px; resize: vertical; }
+  button[type="submit"] {
+    background: var(--green-deep); color: #fff; border: none; padding: 0.75rem 1.5rem;
+    border-radius: 4px; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  button[type="submit"]:hover { background: #3a6b1e; }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--green-deep); color: rgba(255,255,255,0.8); padding: 2.5rem 2rem;
+    text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.9rem;
+  }
+  footer .social-links { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1rem; }
+  footer .social-links a { color: var(--gold-light); text-decoration: none; transition: color 0.2s; }
+  footer .social-links a:hover { color: #fff; }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    nav .links { gap: 0.75rem; font-size: 0.8rem; }
+    nav .links a { font-size: 0.8rem; }
+    .hero h1 { font-size: 2.5rem; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .gig-list li { flex-direction: column; gap: 0.25rem; }
+    section { padding: 3rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Glu<span>i</span>n</div>
+  <ul class="links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#listen">Listen</a></li>
+    <li><a href="#gigs">Gigs</a></li>
+    <li><a href="#gallery">Photos</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <h1>Glu<span class="accent">i</span>n</h1>
+  <p class="tagline">Irish Traditional Music in the San Francisco Bay Area</p>
+  <div class="cta">
+    <a href="#contact" class="btn btn-primary">Book for Gigs</a>
+    <a href="#listen" class="btn btn-outline">Listen</a>
+  </div>
+</section>
+
+<section id="about">
+  <div class="section-inner">
+    <p class="section-label">About the Band</p>
+    <h2>Bringing the Session Home</h2>
+    <img src="photos/about.jpg" alt="Gluin" style="width:100%;max-width:600px;border-radius:6px;margin:1.5rem 0;display:block;">
+    <p class="lead">We're a group of friends who found each other through a shared love of Irish traditional music — the tunes, the songs, the craic.</p>
+    <p>Based in the San Francisco Bay Area, Gluin draws from the deep well of Irish tradition while keeping things fresh, intimate, and full of heart. We play the music we love: jigs, reels, hornpipes, airs, and the occasional song — all with an ear to the tradition and an eye on the room.</p>
+    <p>You'll find us at local sessions, community events, and wherever there's a warm welcome and a good pint. We're always happy to chat about the music, share a tune, or play for your next ceili, wedding, or gathering.</p>
+  </div>
+</section>
+
+<section id="members">
+  <div class="section-inner">
+    <p class="section-label">Meet the Band</p>
+    <h2>The Players</h2>
+    <div class="member-grid">
+      <div class="member-card">
+        <img class="member-photo" src="photos/shea.jpg" alt="Shea Gaier">
+        <h3>Shea Gaier</h3>
+        <p class="role">Fiddle &amp; Vocals</p>
+      </div>
+      <div class="member-card">
+        <img class="member-photo" src="photos/ben.jpg" alt="Ben Wise">
+        <h3>Ben Wise</h3>
+        <p class="role">Guitar &amp; Vocals</p>
+      </div>
+      <div class="member-card">
+        <img class="member-photo" src="photos/drew.jpg" alt="Drew Bagdasarian">
+        <h3>Drew Bagdasarian</h3>
+        <p class="role">Bouzouki</p>
+      </div>
+      <div class="member-card">
+        <img class="member-photo" src="photos/peter.jpg" alt="Peter Kwangjun Suk">
+        <h3>Peter Kwangjun Suk</h3>
+        <p class="role">Bodhrán &amp; Tin Whistle</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="listen">
+  <div class="section-inner">
+    <p class="section-label">Listen</p>
+    <h2>Music &amp; Recordings</h2>
+    <p class="lead">Follow us on Instagram for session clips, tune snippets, and updates. Recordings coming soon.</p>
+    <div class="listen-placeholder">
+      <p style="font-size:2rem">🎵</p>
+      <p>Instagram Reels &amp; Session Clips</p>
+      <p class="note">→ <a href="#" style="color:var(--green-deep)">@gluinmusic on Instagram</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="gigs">
+  <div class="section-inner">
+    <p class="section-label">Gigs</p>
+    <h2>Upcoming &amp; Recent</h2>
+    <p class="lead">Available for private events, weddings, festivals, pub sessions, and ceilis throughout the Bay Area.</p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+      <img src="photos/gig-1.png" alt="Gig flyer" style="max-width:300px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <img src="photos/gig-2.png" alt="Gig flyer" style="max-width:300px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    </div>
+    <ul class="gig-list">
+      <li>
+        <span class="gig-date">Coming Up</span>
+        <div class="gig-info">
+          <h3>Your Event Here</h3>
+          <p class="venue">Available for booking — weddings, parties, festivals, pubs</p>
+        </div>
+      </li>
+      <li>
+        <span class="gig-date">Local Session</span>
+        <div class="gig-info">
+          <h3>Plough &amp; the Stars</h3>
+          <p class="venue">San Francisco, CA — Regular session</p>
+        </div>
+      </li>
+      <li>
+        <span class="gig-date">Local Session</span>
+        <div class="gig-info">
+          <h3>Starry Plough</h3>
+          <p class="venue">Berkeley, CA — Irish trad night</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="section-inner">
+    <p class="section-label">Photos</p>
+    <h2>Gallery</h2>
+    <p class="lead">Moments from gigs, sessions, and the road.</p>
+    <div class="gallery-grid">
+      <div class="gallery-item"><img src="photos/gallery-1.jpg" alt="Gluin performance"></div>
+      <div class="gallery-item"><img src="photos/gallery-2.jpg" alt="Gluin performance"></div>
+      <div class="gallery-item"><img src="photos/gallery-3.jpg" alt="Gluin performance"></div>
+      <div class="gallery-item"><img src="photos/gallery-4.jpg" alt="Gluin group shot"></div>
+      <div class="gallery-item"><img src="photos/gallery-5.jpg" alt="Gluin group shot"></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-inner">
+    <p class="section-label">Get in Touch</p>
+    <h2>Contact &amp; Booking</h2>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p class="lead">We'd love to play for you.</p>
+        <p>Available for:</p>
+        <p>• Weddings &amp; private events<br>• Pub sessions &amp; festivals<br>• Ceilis &amp; community dances<br>• St. Patrick's events</p>
+        <p style="margin-top:1rem">Email: <a href="mailto:gluinmusic@gmail.com">gluinmusic@gmail.com</a></p>
+        <p>Instagram: <a href="#">@gluinmusic</a></p>
+      </div>
+      <form>
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Your Email" required>
+        <textarea placeholder="Tell us about your event — date, location, type of gig..."></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="social-links">
+    <a href="#">Instagram</a>
+    <a href="#">YouTube</a>
+    <a href="#">Email</a>
+  </div>
+  <p>&copy; 2026 Gluin. Irish Traditional Music, SF Bay Area.</p>
+</footer>
+
+</body>
+</html>
