@@ -42,7 +42,7 @@ Each member photo is displayed as a 140×140 pixel circle (cropped round). The f
 - **Notes for alternatives:** Sunglasses hide eyes, which can feel less personal at small size. A closer portrait without sunglasses might be preferred. Still needs to work as a small circle crop.
 
 ### `photos/drew.jpg`
-- **Who:** Drew Bagdasarian — Bouzouki
+- **Who:** Drew Bagdasarian — Bouzouki and Backup Vocals
 - **What it shows:** Drew by hay bales, playing bouzouki. Focused expression, good instrument detail, rural backdrop.
 - **Notes for alternatives:** Strong photo. Bouzouki is clearly visible even at small size. Works well.
 
