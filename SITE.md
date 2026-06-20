@@ -19,7 +19,7 @@
 - **Backend:** Cloudflare Functions (`functions/api/[[route]].ts`) — single catch-all route handler
 - **Database:** Cloudflare D1 (`gluin-db`, binding `DB`)
 - **Admin:** Static admin panel at `admin/index.html`
-- **Contact form submissions:** Go to `stcredzero@fastmail.com` (set in wrangler vars)
+- **Contact form submissions:** Go to `sgaier@usfca.edu` (set in wrangler vars)
 
 ## Band Members & Roles
 
@@ -74,6 +74,6 @@ This pushes the whole directory to Cloudflare Pages. The `wrangler.toml` has `pa
 
 ## Contact
 
-- Band email: `gluinmusic@gmail.com`
+- Band email: `sgaier@usfca.edu`
 - Instagram: `@gluinmusic`
-- Contact form submissions: `stcredzero@fastmail.com`
+- Contact form submissions: `sgaier@usfca.edu`
