@@ -119,12 +119,27 @@
 
   /* ── Listen ── */
   #listen { background: #fff; }
-  .listen-placeholder {
-    background: var(--green-light); border-radius: 8px; padding: 3rem 2rem;
-    text-align: center; color: var(--green-mid); margin-top: 1.5rem;
+  .album-card {
+    display: flex; gap: 2rem; align-items: center;
+    background: var(--green-light); border-radius: 8px;
+    padding: 1.5rem; margin-top: 1.5rem;
   }
-  .listen-placeholder .note { font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .album-cover {
+    width: 220px; height: 220px; flex-shrink: 0;
+    border-radius: 4px; object-fit: cover; display: block;
+    box-shadow: 0 2px 12px rgba(45,80,22,0.18);
+  }
+  .album-info h3 {
+    font-size: 1.5rem; font-weight: 400; color: var(--green-deep);
+    margin-bottom: 0.2rem; letter-spacing: 0.02em;
+  }
+  .album-artist {
+    font-size: 0.95rem; color: var(--gold); font-style: italic;
+    margin-bottom: 0.75rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .album-info p { color: var(--text); }
+  .album-info .btn { margin-top: 0.35rem; }
 
   /* ── Gigs ── */
   #gigs { background: var(--cream-dark); }
@@ -189,6 +204,8 @@
     .hero h1 { font-size: 2.5rem; }
     .contact-grid { grid-template-columns: 1fr; }
     .gig-list li { flex-direction: column; gap: 0.25rem; }
+    .album-card { flex-direction: column; text-align: center; padding: 1.5rem 1.25rem; }
+    .album-cover { width: 200px; height: 200px; }
     section { padding: 3rem 1.25rem; }
   }
 </style>
@@ -259,11 +276,16 @@
   <div class="section-inner">
     <p class="section-label">Listen</p>
     <h2>Music &amp; Recordings</h2>
-    <p class="lead">Follow us on Instagram for session clips, tune snippets, and updates. Recordings coming soon.</p>
-    <div class="listen-placeholder" id="music-container">
-      <p style="font-size:2rem">🎵</p>
-      <p>Loading music links…</p>
-    </div>
+    <p class="lead">Gluin is a Bay Area Irish traditional band. Our first recording is out now.</p>
+    <article class="album-card">
+      <img class="album-cover" src="photos/strawberry-beds.jpg" alt="Cover art for The Strawberry Beds by Shea Gaier">
+      <div class="album-info">
+        <h3>The Strawberry Beds</h3>
+        <p class="album-artist">Shea Gaier</p>
+        <p>Irish traditional tunes and songs recorded with Gluin. Stream or buy the album on Shea’s Bandcamp.</p>
+        <a class="btn btn-primary" href="https://sheagaier.bandcamp.com/album/the-strawberry-beds" target="_blank" rel="noopener">Listen / buy on Bandcamp</a>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -364,22 +386,6 @@
       grid.innerHTML = '<p style="color:var(--text-light);font-style:italic;grid-column:1/-1;text-align:center">Photos coming soon!</p>';
     }
   } catch(e) { console.warn('Failed to load gallery', e); }
-
-  // Load music links
-  try {
-    const res = await fetch(API + '/music');
-    const links = await res.json();
-    const container = document.getElementById('music-container');
-    if (links.length) {
-      container.innerHTML =
-        '<p style="font-size:2rem">🎵</p>' +
-        links.map(l =>
-          `<p style="margin-bottom:0.5rem">${l.platform ? esc(l.platform) + ': ' : ''}<a href="${esc(l.url || '#')}" style="color:var(--green-deep)" target="_blank" rel="noopener">${esc(l.title)}</a></p>`
-        ).join('');
-    } else {
-      container.innerHTML = '<p style="font-size:2rem">🎵</p><p>Music links coming soon.</p>';
-    }
-  } catch(e) { console.warn('Failed to load music', e); }
 })();
 
 // ── Contact form ──
